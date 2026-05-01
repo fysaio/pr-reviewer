@@ -63,7 +63,7 @@ def get_pr_details(repo_full_name: str, pr_number: int) -> dict:
     return response.json()
 
 
-def post_review_comments(repo_full_name: str, pr_number: int, findings: list[dict]) -> None:
+def post_review_comments(repo_full_name: str, pr_number: int, findings: list[dict], intent: dict = None) -> None:
     token = get_installation_token()
     url = f"https://api.github.com/repos/{repo_full_name}/pulls/{pr_number}/reviews"
     headers = {
@@ -72,13 +72,29 @@ def post_review_comments(repo_full_name: str, pr_number: int, findings: list[dic
     }
 
     body_lines = ["## AI PR Review\n"]
-    for f in findings:
-        emoji = {"critical": "🔴", "major": "🟠", "minor": "🟡"}.get(f["severity"], "⚪")
-        body_lines.append(
-            f"{emoji} **[{f['category'].upper()}]** `{f['severity']}` — "
-            f"`{f['file']}` line {f['line']} (confidence: {f['confidence']}%)\n\n"
-            f"> {f['comment']}\n"
-        )
+
+    if intent:
+        match_icon = {"true": "✅", "false": "❌", "None": "❓"}.get(str(intent.get("matches")), "❓")
+        body_lines.append(f"### Intent Check {match_icon}")
+        body_lines.append(f"> {intent.get('summary', 'N/A')}")
+        if intent.get("mismatches"):
+            body_lines.append("\n**Mismatches found:**")
+            for m in intent["mismatches"]:
+                body_lines.append(f"- {m}")
+        body_lines.append(f"\n_Intent confidence: {intent.get('confidence', 0)}%_\n")
+
+    if findings:
+        body_lines.append("### Code Findings\n")
+        for f in findings:
+            emoji = {"critical": "🔴", "major": "🟠", "minor": "🟡"}.get(f["severity"], "⚪")
+            body_lines.append(
+                f"{emoji} **[{f['category'].upper()}]** `{f['severity']}` — "
+                f"`{f['file']}` line {f['line']} (confidence: {f['confidence']}%)\n\n"
+                f"> {f['comment']}\n"
+            )
+    else:
+        body_lines.append("### Code Findings\n")
+        body_lines.append("✅ No issues found.\n")
 
     payload = {
         "body": "\n".join(body_lines),
