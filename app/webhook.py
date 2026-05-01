@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request, HTTPException
 import hmac
 import hashlib
 import os
+import threading
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -38,6 +39,7 @@ async def github_webhook(request: Request):
         repo = payload.get("repository", {}).get("full_name")
         pr_number = pr.get("number")
         pr_title = pr.get("title", "")
+        head_sha = pr.get("head", {}).get("sha")
 
         print(f"\n--- PR EVENT ---")
         print(f"Action: {action}")
@@ -50,17 +52,24 @@ async def github_webhook(request: Request):
         if action in ("opened", "synchronize"):
             from app.github_client import get_pr_diff, get_pr_details, post_review_comments, get_installation_token
             from app.reviewer import review_pr
-            from app.indexer import index_repo, search_relevant_files
+            from app.indexer import index_repo, search_relevant_files, is_recently_indexed
             from app.intent_checker import check_intent
+            from app.checks import create_check_run, complete_check_run
+
+            # Post check run immediately so user sees feedback on GitHub
+            check_run_id = create_check_run(repo, head_sha)
 
             token = get_installation_token()
             details = get_pr_details(repo, pr_number)
             diff = get_pr_diff(repo, pr_number)
             pr_desc = details.get("body")
 
-            if action == "opened":
-                print(f"[Indexer] Indexing repo {repo}...")
-                index_repo(repo, token)
+            # Index in background only if not recently indexed
+            if not is_recently_indexed(repo):
+                print(f"[Indexer] Repo not indexed recently, indexing in background...")
+                threading.Thread(target=index_repo, args=(repo, token), daemon=True).start()
+            else:
+                print(f"[Indexer] Repo already indexed recently, skipping.")
 
             print(f"[Indexer] Searching for relevant context...")
             context_files = search_relevant_files(repo, diff[:3000])
@@ -81,5 +90,8 @@ async def github_webhook(request: Request):
             print(f"--------------------------------\n")
 
             post_review_comments(repo, pr_number, findings, intent)
+
+            if check_run_id:
+                complete_check_run(repo, check_run_id, findings, intent)
 
     return {"ok": True}

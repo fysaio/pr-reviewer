@@ -10,13 +10,28 @@ supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_
 IGNORED_EXTENSIONS = {
     ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico",
     ".lock", ".pdf", ".zip", ".exe", ".bin",
-    ".woff", ".woff2", ".ttf", ".eot",
+    ".woff", ".woff2", ".ttf", ".eot", ".docx", ".doc",
+    ".log",
 }
 
 IGNORED_PATHS = {
     "node_modules", ".git", "venv", "__pycache__",
     ".next", "dist", "build", ".env",
 }
+
+
+def is_recently_indexed(repo_full_name: str, max_age_hours: int = 24) -> bool:
+    result = supabase.table("repo_files")\
+        .select("indexed_at")\
+        .eq("repo_full_name", repo_full_name)\
+        .order("indexed_at", desc=True)\
+        .limit(1)\
+        .execute()
+    if not result.data:
+        return False
+    from datetime import datetime, timezone, timedelta
+    last_indexed = datetime.fromisoformat(result.data[0]["indexed_at"].replace("Z", "+00:00"))
+    return datetime.now(timezone.utc) - last_indexed < timedelta(hours=max_age_hours)
 
 
 def should_index(file_path: str) -> bool:
