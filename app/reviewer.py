@@ -20,7 +20,7 @@ Assume the reviewer understands the implications.
 """
 
 
-def review_pr(diff: str, pr_description: str, context_files: list[dict] = None, mode: str = "junior") -> list[dict]:
+def review_pr(diff: str, pr_description: str, context_files: list[dict] = None, mode: str = "junior") -> dict:
     context_section = ""
     if context_files:
         context_section = "## Relevant Codebase Context\n\n"
@@ -38,15 +38,28 @@ PR Description: {pr_description or "No description provided"}
 ## Diff to Review
 {diff}
 
-Return ONLY a JSON array. No markdown, no explanation. Each item must have:
+Analyze the diff and the context files separately.
+
+Return ONLY a JSON object with two arrays. No markdown, no explanation.
+
+{{
+  "diff_findings": [...],
+  "context_findings": [...]
+}}
+
+**diff_findings**: Issues found directly in the diff above. These are problems introduced or visible in this PR.
+
+**context_findings**: Issues found in the context files that are relevant to this PR. These are pre-existing problems in code this PR touches or depends on. Only include these if they are genuinely relevant to understanding or safely merging this PR.
+
+Each finding in both arrays must have:
 - "file": the filename
-- "line": line number in the diff (integer)
+- "line": line number (integer)
 - "category": one of "bug", "style", "security", "performance", "missing_test"
 - "severity": one of "critical", "major", "minor"
-- "comment": your review comment based on the mode instructions above. Keep each comment under 400 characters.
-- "confidence": integer 0-100, how confident you are this is a real issue
+- "comment": your review comment based on the mode instructions. Keep under 400 characters.
+- "confidence": integer 0-100
 
-Only flag real issues. If the diff is clean, return an empty array [].
+Only flag real issues. Return empty arrays if nothing found.
 """
 
     response = client.models.generate_content(
@@ -62,15 +75,17 @@ Only flag real issues. If the diff is clean, return an empty array [].
     text = text.strip()
 
     try:
-        findings = json.loads(text)
-        findings = [f for f in findings if f.get("confidence", 0) >= 70]
-        return findings
+        result = json.loads(text)
+        diff_findings = [f for f in result.get("diff_findings", []) if f.get("confidence", 0) >= 70]
+        context_findings = [f for f in result.get("context_findings", []) if f.get("confidence", 0) >= 70]
+        return {"diff_findings": diff_findings, "context_findings": context_findings}
     except json.JSONDecodeError:
         try:
-            text = text[:text.rfind("}") + 1] + "]"
-            findings = json.loads(text)
-            findings = [f for f in findings if f.get("confidence", 0) >= 70]
-            return findings
+            text = text[:text.rfind("}") + 1] + "}"
+            result = json.loads(text)
+            diff_findings = [f for f in result.get("diff_findings", []) if f.get("confidence", 0) >= 70]
+            context_findings = [f for f in result.get("context_findings", []) if f.get("confidence", 0) >= 70]
+            return {"diff_findings": diff_findings, "context_findings": context_findings}
         except Exception:
             print(f"[ERROR] Could not parse Gemini response: {text}")
-            return []
+            return {"diff_findings": [], "context_findings": []}

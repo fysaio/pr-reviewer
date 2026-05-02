@@ -1,4 +1,5 @@
 import os
+import threading
 import requests
 from supabase import create_client
 from dotenv import load_dotenv
@@ -18,6 +19,25 @@ IGNORED_PATHS = {
     "node_modules", ".git", "venv", "__pycache__",
     ".next", "dist", "build", ".env",
 }
+
+_indexing_locks: dict[str, threading.Lock] = {}
+_locks_mutex = threading.Lock()
+
+
+def get_repo_lock(repo_full_name: str) -> threading.Lock:
+    with _locks_mutex:
+        if repo_full_name not in _indexing_locks:
+            _indexing_locks[repo_full_name] = threading.Lock()
+        return _indexing_locks[repo_full_name]
+
+
+def has_any_index(repo_full_name: str) -> bool:
+    result = supabase.table("repo_files")\
+        .select("id")\
+        .eq("repo_full_name", repo_full_name)\
+        .limit(1)\
+        .execute()
+    return len(result.data) > 0
 
 
 def is_recently_indexed(repo_full_name: str, max_age_hours: int = 24) -> bool:
@@ -86,34 +106,39 @@ def fetch_file_content(repo_full_name: str, file_path: str, token: str) -> str |
 
 
 def index_repo(repo_full_name: str, token: str) -> None:
-    print(f"[Indexer] Starting index for {repo_full_name}")
+    lock = get_repo_lock(repo_full_name)
+    if not lock.acquire(blocking=False):
+        print(f"[Indexer] Already indexing {repo_full_name}, skipping duplicate.")
+        return
+    try:
+        print(f"[Indexer] Starting index for {repo_full_name}")
+        supabase.table("repo_files").delete().eq("repo_full_name", repo_full_name).execute()
 
-    supabase.table("repo_files").delete().eq("repo_full_name", repo_full_name).execute()
+        files = fetch_repo_files(repo_full_name, token)
+        print(f"[Indexer] Found {len(files)} files to index")
 
-    files = fetch_repo_files(repo_full_name, token)
-    print(f"[Indexer] Found {len(files)} files to index")
+        indexed = 0
+        for file in files:
+            path = file["path"]
+            content = fetch_file_content(repo_full_name, path, token)
+            if not content or len(content.strip()) == 0:
+                continue
+            content_truncated = content[:8000]
+            try:
+                embedding = get_embedding(f"{path}\n\n{content_truncated}")
+                supabase.table("repo_files").insert({
+                    "repo_full_name": repo_full_name,
+                    "file_path": path,
+                    "content": content_truncated,
+                    "embedding": embedding,
+                }).execute()
+                indexed += 1
+            except Exception as e:
+                print(f"[Indexer] Failed to index {path}: {e}")
 
-    indexed = 0
-    for file in files:
-        path = file["path"]
-        content = fetch_file_content(repo_full_name, path, token)
-        if not content or len(content.strip()) == 0:
-            continue
-        content_truncated = content[:8000]
-        try:
-            embedding = get_embedding(f"{path}\n\n{content_truncated}")
-            supabase.table("repo_files").insert({
-                "repo_full_name": repo_full_name,
-                "file_path": path,
-                "content": content_truncated,
-                "embedding": embedding,
-            }).execute()
-            indexed += 1
-            print(f"[Indexer] Indexed {path}")
-        except Exception as e:
-            print(f"[Indexer] Failed to index {path}: {e}")
-
-    print(f"[Indexer] Done. {indexed}/{len(files)} files indexed for {repo_full_name}")
+        print(f"[Indexer] Done. {indexed}/{len(files)} files indexed for {repo_full_name}")
+    finally:
+        lock.release()
 
 
 def search_relevant_files(repo_full_name: str, query: str, limit: int = 5) -> list[dict]:
@@ -124,3 +149,38 @@ def search_relevant_files(repo_full_name: str, query: str, limit: int = 5) -> li
         "match_count": limit,
     }).execute()
     return result.data
+
+
+def update_changed_files(repo_full_name: str, file_paths: list[str], token: str) -> None:
+    lock = get_repo_lock(repo_full_name)
+    if not lock.acquire(blocking=False):
+        print(f"[Indexer] Already indexing {repo_full_name}, skipping incremental update.")
+        return
+    try:
+        for path in file_paths:
+            if not should_index(path):
+                continue
+
+            supabase.table("repo_files")\
+                .delete()\
+                .eq("repo_full_name", repo_full_name)\
+                .eq("file_path", path)\
+                .execute()
+
+            content = fetch_file_content(repo_full_name, path, token)
+            if not content or len(content.strip()) == 0:
+                continue
+            content_truncated = content[:8000]
+            try:
+                embedding = get_embedding(f"{path}\n\n{content_truncated}")
+                supabase.table("repo_files").insert({
+                    "repo_full_name": repo_full_name,
+                    "file_path": path,
+                    "content": content_truncated,
+                    "embedding": embedding,
+                }).execute()
+                print(f"[Indexer] Updated {path}")
+            except Exception as e:
+                print(f"[Indexer] Failed to update {path}: {e}")
+    finally:
+        lock.release()

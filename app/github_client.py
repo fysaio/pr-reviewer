@@ -63,7 +63,7 @@ def get_pr_details(repo_full_name: str, pr_number: int) -> dict:
     return response.json()
 
 
-def post_review_comments(repo_full_name: str, pr_number: int, findings: list[dict], intent: dict = None) -> None:
+def post_review_comments(repo_full_name: str, pr_number: int, review: dict, intent: dict = None) -> None:
     token = get_installation_token()
     url = f"https://api.github.com/repos/{repo_full_name}/pulls/{pr_number}/reviews"
     headers = {
@@ -71,10 +71,13 @@ def post_review_comments(repo_full_name: str, pr_number: int, findings: list[dic
         "Accept": "application/vnd.github+json",
     }
 
+    diff_findings = review.get("diff_findings", [])
+    context_findings = review.get("context_findings", [])
+
     body_lines = ["## AI PR Review\n"]
 
     if intent:
-        match_icon = {"true": "✅", "false": "❌", "None": "❓"}.get(str(intent.get("matches")), "❓")
+        match_icon = "✅" if intent.get("matches") else "❌" if intent.get("matches") is False else "❓"
         body_lines.append(f"### Intent Check {match_icon}")
         body_lines.append(f"> {intent.get('summary', 'N/A')}")
         if intent.get("mismatches"):
@@ -83,9 +86,9 @@ def post_review_comments(repo_full_name: str, pr_number: int, findings: list[dic
                 body_lines.append(f"- {m}")
         body_lines.append(f"\n_Intent confidence: {intent.get('confidence', 0)}%_\n")
 
-    if findings:
-        body_lines.append("### Code Findings\n")
-        for f in findings:
+    body_lines.append("### Issues in this PR\n")
+    if diff_findings:
+        for f in diff_findings:
             emoji = {"critical": "🔴", "major": "🟠", "minor": "🟡"}.get(f["severity"], "⚪")
             body_lines.append(
                 f"{emoji} **[{f['category'].upper()}]** `{f['severity']}` — "
@@ -93,8 +96,18 @@ def post_review_comments(repo_full_name: str, pr_number: int, findings: list[dic
                 f"> {f['comment']}\n"
             )
     else:
-        body_lines.append("### Code Findings\n")
-        body_lines.append("✅ No issues found.\n")
+        body_lines.append("✅ No issues found in this PR.\n")
+
+    if context_findings:
+        body_lines.append("---\n### Related Issues Worth Noting\n")
+        body_lines.append("_These are pre-existing issues in code this PR touches or depends on. Not blockers, but worth knowing._\n")
+        for f in context_findings:
+            emoji = {"critical": "🔴", "major": "🟠", "minor": "🟡"}.get(f["severity"], "⚪")
+            body_lines.append(
+                f"{emoji} **[{f['category'].upper()}]** `{f['severity']}` — "
+                f"`{f['file']}` line {f['line']} (confidence: {f['confidence']}%)\n\n"
+                f"> {f['comment']}\n"
+            )
 
     payload = {
         "body": "\n".join(body_lines),
@@ -103,6 +116,6 @@ def post_review_comments(repo_full_name: str, pr_number: int, findings: list[dic
 
     response = requests.post(url, headers=headers, json=payload)
     if response.status_code == 200:
-        print(f"[GitHub] Posted review with {len(findings)} finding(s) successfully.")
+        print(f"[GitHub] Posted review — {len(diff_findings)} PR issue(s), {len(context_findings)} related issue(s).")
     else:
         print(f"[GitHub] Failed to post review: {response.status_code} {response.text}")

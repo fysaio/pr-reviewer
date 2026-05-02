@@ -58,7 +58,7 @@ def create_check_run(repo_full_name: str, head_sha: str, name: str = "AI PR Revi
         return None
 
 
-def complete_check_run(repo_full_name: str, check_run_id: str, findings: list[dict], intent: dict) -> None:
+def complete_check_run(repo_full_name: str, check_run_id: str, review: dict, intent: dict) -> None:
     token = get_installation_token()
     url = f"https://api.github.com/repos/{repo_full_name}/check-runs/{check_run_id}"
     headers = {
@@ -66,7 +66,9 @@ def complete_check_run(repo_full_name: str, check_run_id: str, findings: list[di
         "Accept": "application/vnd.github+json",
     }
 
-    critical_or_major = [f for f in findings if f.get("severity") in ("critical", "major")]
+    diff_findings = review.get("diff_findings", [])
+    context_findings = review.get("context_findings", [])
+    critical_or_major = [f for f in diff_findings if f.get("severity") in ("critical", "major")]
     conclusion = "failure" if critical_or_major else "success"
 
     summary_lines = []
@@ -77,23 +79,37 @@ def complete_check_run(repo_full_name: str, check_run_id: str, findings: list[di
             for m in intent["mismatches"]:
                 summary_lines.append(f"- {m}")
 
-    summary_lines.append(f"\n**Findings:** {len(findings)} issue(s) found.")
+    summary_lines.append(f"\n**Issues in this PR:** {len(diff_findings)}")
+    if context_findings:
+        summary_lines.append(f"**Related issues worth noting:** {len(context_findings)}")
 
     text_lines = []
-    for f in findings:
-        emoji = {"critical": "🔴", "major": "🟠", "minor": "🟡"}.get(f["severity"], "⚪")
-        text_lines.append(
-            f"{emoji} **[{f['category'].upper()}]** `{f['severity']}` — "
-            f"`{f['file']}` line {f['line']} (confidence: {f['confidence']}%)\n\n"
-            f"{f['comment']}\n"
-        )
+    if diff_findings:
+        text_lines.append("## Issues in this PR\n")
+        for f in diff_findings:
+            emoji = {"critical": "🔴", "major": "🟠", "minor": "🟡"}.get(f["severity"], "⚪")
+            text_lines.append(
+                f"{emoji} **[{f['category'].upper()}]** `{f['severity']}` — "
+                f"`{f['file']}` line {f['line']} (confidence: {f['confidence']}%)\n\n"
+                f"{f['comment']}\n"
+            )
+
+    if context_findings:
+        text_lines.append("## Related Issues Worth Noting\n")
+        for f in context_findings:
+            emoji = {"critical": "🔴", "major": "🟠", "minor": "🟡"}.get(f["severity"], "⚪")
+            text_lines.append(
+                f"{emoji} **[{f['category'].upper()}]** `{f['severity']}` — "
+                f"`{f['file']}` line {f['line']} (confidence: {f['confidence']}%)\n\n"
+                f"{f['comment']}\n"
+            )
 
     payload = {
         "status": "completed",
         "conclusion": conclusion,
         "completed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "output": {
-            "title": f"AI Review complete — {len(findings)} finding(s)",
+            "title": f"AI Review — {len(diff_findings)} PR issue(s), {len(context_findings)} related",
             "summary": "\n".join(summary_lines),
             "text": "\n".join(text_lines) if text_lines else "No issues found.",
         }
