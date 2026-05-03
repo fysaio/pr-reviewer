@@ -12,6 +12,9 @@ INSTALLATION_ID = os.getenv("GITHUB_INSTALLATION_ID")
 
 
 def load_private_key() -> str:
+    key_content = os.getenv("GITHUB_PRIVATE_KEY")
+    if key_content:
+        return key_content.replace("\\n", "\n")
     with open(PRIVATE_KEY_PATH, "r") as f:
         return f.read()
 
