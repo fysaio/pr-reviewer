@@ -9,6 +9,7 @@ load_dotenv()
 router = APIRouter()
 
 WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET", "")
+REVIEW_MODE = os.getenv("REVIEW_MODE", "junior")
 
 
 def verify_signature(payload: bytes, signature: str) -> bool:
@@ -45,6 +46,7 @@ async def github_webhook(request: Request):
         print(f"Repo: {repo}")
         print(f"PR #{pr_number}: {pr_title}")
         print(f"By: {pr.get('user', {}).get('login')}")
+        print(f"Mode: {REVIEW_MODE}")
         print(f"----------------\n")
 
         if action in ("opened", "synchronize"):
@@ -57,7 +59,6 @@ async def github_webhook(request: Request):
         commits = payload.get("commits", [])
         ref = payload.get("ref", "")
 
-        # Only process pushes to main/master
         if ref not in ("refs/heads/main", "refs/heads/master"):
             return {"ok": True}
 
@@ -71,12 +72,9 @@ async def github_webhook(request: Request):
 
         if changed_files:
             from app.tasks import process_push
-            from app.github_client import get_installation_token
             from app.indexer import has_any_index
-
             if has_any_index(repo):
-                token = get_installation_token()
-                process_push.delay(repo, changed_files, token)
+                process_push.delay(repo, changed_files)
                 print(f"[Webhook] Queued incremental index for {repo} — {len(changed_files)} file(s)")
 
     return {"ok": True}
