@@ -40,8 +40,20 @@ def process_pr(self, repo: str, pr_number: int, pr_title: str, pr_desc: str, hea
         from app.indexer import index_repo, search_relevant_files, is_recently_indexed, has_any_index
         from app.intent_checker import check_intent
         from app.checks import create_check_run, complete_check_run
+        from app.repo_settings import get_or_create_settings, update_after_review, is_enabled
 
         print(f"[Task] Starting review for {repo} PR #{pr_number}")
+
+        # Check if repo is enabled
+        if not is_enabled(repo):
+            print(f"[Task] Reviews disabled for {repo}, skipping.")
+            return
+
+        # Get per-repo settings
+        settings = get_or_create_settings(repo)
+        review_mode = settings.get("review_mode", REVIEW_MODE)
+        confidence_threshold = settings.get("confidence_threshold", 70)
+        print(f"[Task] Mode: {review_mode}, Confidence threshold: {confidence_threshold}%")
 
         check_run_id = create_check_run(repo, head_sha)
 
@@ -66,8 +78,8 @@ def process_pr(self, repo: str, pr_number: int, pr_title: str, pr_desc: str, hea
         intent = check_intent(diff, pr_desc_fetched, pr_title)
         print(f"[Task] Intent matches: {intent.get('matches')} (confidence: {intent.get('confidence')}%)")
 
-        print(f"[Task] Running Gemini review in {REVIEW_MODE} mode...")
-        review = review_pr(diff, pr_desc_fetched, context_files, mode=REVIEW_MODE)
+        print(f"[Task] Running Gemini review in {review_mode} mode...")
+        review = review_pr(diff, pr_desc_fetched, context_files, mode=review_mode, confidence_threshold=confidence_threshold)
         print(f"[Task] Found {len(review['diff_findings'])} PR issue(s), {len(review['context_findings'])} related issue(s)")
 
         post_review_comments(repo, pr_number, review, intent)
@@ -75,6 +87,7 @@ def process_pr(self, repo: str, pr_number: int, pr_title: str, pr_desc: str, hea
         if check_run_id:
             complete_check_run(repo, check_run_id, review, intent)
 
+        update_after_review(repo)
         print(f"[Task] Review complete for {repo} PR #{pr_number}")
 
     except Exception as exc:

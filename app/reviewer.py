@@ -21,7 +21,7 @@ Assume the reviewer understands the implications.
 """
 
 
-def review_pr(diff: str, pr_description: str, context_files: list[dict] = None, mode: str = "junior") -> dict:
+def review_pr(diff: str, pr_description: str, context_files: list[dict] = None, mode: str = "junior", confidence_threshold: int = 70) -> dict:
     context_section = ""
     if context_files:
         context_section = "## Relevant Codebase Context\n\n"
@@ -76,8 +76,8 @@ Only flag real issues. Return empty arrays if nothing found.
     text = text.strip()
 
     def extract_findings(raw: dict) -> dict:
-        diff_findings = [f for f in raw.get("diff_findings", []) if f.get("confidence", 0) >= 70]
-        context_findings = [f for f in raw.get("context_findings", []) if f.get("confidence", 0) >= 70]
+        diff_findings = [f for f in raw.get("diff_findings", []) if f.get("confidence", 0) >= confidence_threshold]
+        context_findings = [f for f in raw.get("context_findings", []) if f.get("confidence", 0) >= confidence_threshold]
         return {"diff_findings": diff_findings, "context_findings": context_findings}
 
     # Attempt 1: direct parse

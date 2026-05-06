@@ -7,13 +7,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 APP_ID = os.getenv("GITHUB_APP_ID")
-PRIVATE_KEY_PATH = os.getenv("GITHUB_PRIVATE_KEY_PATH")
+PRIVATE_KEY = os.getenv("GITHUB_PRIVATE_KEY")
 INSTALLATION_ID = os.getenv("GITHUB_INSTALLATION_ID")
 
 
 def get_installation_token() -> str:
-    with open(PRIVATE_KEY_PATH, "r") as f:
-        private_key = f.read()
+    private_key = PRIVATE_KEY
     now = int(time.time())
     payload = {
         "iat": now - 60,
