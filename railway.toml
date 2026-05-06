@@ -2,4 +2,4 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "celery -A app.celery_app worker --loglevel=info"
+startCommand = "python -m celery -A app.tasks worker --loglevel=info --pool=solo"
