@@ -40,7 +40,7 @@ def process_pr(self, repo: str, pr_number: int, pr_title: str, pr_desc: str, hea
         from app.indexer import index_repo, search_relevant_files, is_recently_indexed, has_any_index
         from app.intent_checker import check_intent
         from app.checks import create_check_run, complete_check_run
-        from app.repo_settings import get_or_create_settings, update_after_review, is_enabled
+        from app.repo_settings import get_or_create_settings, update_after_review, is_enabled, log_review
 
         print(f"[Task] Starting review for {repo} PR #{pr_number}")
 
@@ -86,6 +86,17 @@ def process_pr(self, repo: str, pr_number: int, pr_title: str, pr_desc: str, hea
 
         if check_run_id:
             complete_check_run(repo, check_run_id, review, intent)
+
+        verdict = "pass" if len(review["diff_findings"]) == 0 else "fail"
+        log_review(
+            repo_full_name=repo,
+            pr_number=pr_number,
+            pr_title=pr_title,
+            diff_findings=len(review["diff_findings"]),
+            context_findings=len(review["context_findings"]),
+            verdict=verdict,
+            review_mode=review_mode,
+        )
 
         update_after_review(repo)
         print(f"[Task] Review complete for {repo} PR #{pr_number}")
