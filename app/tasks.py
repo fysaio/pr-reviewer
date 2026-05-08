@@ -87,7 +87,7 @@ def process_pr(self, repo: str, pr_number: int, pr_title: str, pr_desc: str, hea
         if check_run_id:
             complete_check_run(repo, check_run_id, review, intent)
 
-        verdict = "pass" if len(review["diff_findings"]) == 0 else "fail"
+        verdict = "clean" if len(review["diff_findings"]) == 0 else "flagged"
         log_review(
             repo_full_name=repo,
             pr_number=pr_number,
