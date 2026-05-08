@@ -1,12 +1,36 @@
-# AI PR Reviewer
+# Reviu (AI PR Reviewer)
 
-An automated code review agent that uses Google Gemini and Vector Search (Supabase) to provide context-aware reviews for GitHub Pull Requests.
+An automated, context-aware code review agent that uses Google Gemini and Vector Search (Supabase pgvector) to provide deep, systemic reviews for GitHub Pull Requests.
+
+Unlike traditional AI reviewers that only look at the PR diff, **Reviu indexes your entire repository** and retrieves the most contextually relevant files *before* analyzing the changes. This allows it to catch cross-file bugs, architectural inconsistencies, and silent omissions that diff-only systems structurally cannot see.
 
 ## Features
-- **Context-Aware Reviews**: Uses RAG (Retrieval-Augmented Generation) to search your codebase for relevant files before reviewing a PR.
-- **Dual AI Support**: Compatible with Google AI Studio (Gemini API) and Vertex AI.
-- **Automated Comments**: Posts review findings directly onto the GitHub PR as line-by-line comments.
-- **FastAPI Backend**: Lightweight and ready for deployment.
+- **RAG-Powered Context**: Uses `gemini-embedding-001` to index the repo into Supabase. For every PR, the diff is embedded and used to query the top 5 most relevant files via cosine similarity.
+- **Dual-Pass Review**: 
+  - *Pass 1*: Verifies intent (Does the code do what the description claims?).
+  - *Pass 2*: Deep code review with full context (diff + retrieved files) using Gemini 2.5 Flash.
+- **Decoupled Architecture**: Fast HTTP webhook acknowledgment (to satisfy GitHub's timeouts) while a Celery/Redis worker processes the heavy lifting asynchronously.
+- **Configurable Thresholds**: Every finding gets an AI-generated confidence score. Repositories can set a custom threshold to filter out noise.
+- **Junior vs Senior Modes**: Configurable verbosity. Junior mode explains *why* something is an issue; Senior mode is concise and direct.
+
+---
+
+## How It Works
+
+```text
+GitHub PR opened → POST /webhook (200 immediately)
+      ↓
+Celery task queued in Redis
+      ↓
+Worker: check repo_settings → fetch diff → index repo (if needed)
+      ↓
+pgvector semantic search → top 5 relevant files retrieved
+      ↓
+Gemini call 1: intent verification
+Gemini call 2: code review with context
+      ↓
+Post Check Run + PR comment → update repo_settings
+```
 
 ---
 
@@ -23,7 +47,7 @@ An automated code review agent that uses Google Gemini and Vector Search (Supaba
 5. **Private Key**: Generate a private key and download the `.pem` file. Place it in the root directory.
 6. **Installation**: Install the app on your repository and note the **Installation ID**.
 
-### 2. Supabase (Vector Database) Setup
+### 2. Supabase (pgvector) Setup
 1. Create a new project on [Supabase](https://supabase.com/).
 2. Enable the **Vector** extension in the SQL Editor:
    ```sql
@@ -74,13 +98,14 @@ An automated code review agent that uses Google Gemini and Vector Search (Supaba
    ```
 
 ### 3. Environment Variables
-Create a `.env` file in the root directory (use `.env.example` if provided):
+Create a `.env` file in the root directory:
 ```env
 # GitHub App
 GITHUB_APP_ID=your_app_id
 GITHUB_WEBHOOK_SECRET=your_webhook_secret
 GITHUB_PRIVATE_KEY_PATH=your-key.pem
-GITHUB_INSTALLATION_ID=your_installation_id
+# Alternatively, pass the key as an environment variable directly
+# GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n..." 
 
 # AI Provider
 GOOGLE_AI_API_KEY=your_gemini_api_key
@@ -88,9 +113,12 @@ GOOGLE_AI_API_KEY=your_gemini_api_key
 # Supabase
 SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_KEY=your_supabase_service_role_key
+
+# Redis (Celery Broker/Backend)
+REDIS_URL=redis://localhost:6379/0
 ```
 
-### 4. Local Installation
+### 4. Local Installation & Running
 ```bash
 # Clone the repository
 git clone https://github.com/fysaio/pr-reviewer.git
@@ -103,22 +131,23 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the server
+# In Terminal 1: Start Redis (make sure redis-server is installed)
+redis-server
+
+# In Terminal 2: Start the Celery Worker
+celery -A app.celery_app worker --loglevel=info
+
+# In Terminal 3: Start the FastAPI webhook server
 uvicorn app.main:app --reload
 ```
 
 ---
 
-## How it Works
-1. **Webhook**: When a PR is opened or updated, GitHub sends a webhook to this app.
-2. **Indexing**: On the first PR, the app crawls the repository, generates embeddings for every file, and stores them in Supabase.
-3. **Context Retrieval**: For every PR change, the app searches Supabase for files most relevant to the modified code.
-4. **AI Review**: The PR diff + retrieved context are sent to Gemini for analysis.
-5. **Feedback**: Review comments are posted back to the GitHub PR automatically.
+## Documentation & Performance Evals
 
-## Writeup
+For an in-depth look at Reviu's architecture, the specific flaws of diff-only AI reviewers, and an honest account of our evaluation results (Recall: 0.909, Precision: 0.405), please read the full writeup:
 
-[How Reviu works, architecture decisions, and eval results →](./WRITEUP.md)
+[**How Reviu works, architecture decisions, and eval results →**](./WRITEUP.md)
 
 ## License
 MIT
