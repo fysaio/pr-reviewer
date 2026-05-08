@@ -1,0 +1,34 @@
+{
+  "case_id": "radix_sheet_component_bugs",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 3,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1_score": 0.667,
+    "avg_tp_confidence": 95.0
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "minor",
+      "file": "src/components/ui/sheet.tsx",
+      "line": 139,
+      "comment": "> The file `src/components/ui/sheet.tsx` is missing a newline character at the end of the file. This is a common linting error and can cause issues with some tools (e.g., `git diff` or build systems). Please add a newline at the very end of the file for consistency and compatibility.\n\n---\n### Related Issues Worth Noting\n\n_These are pre-existing issues in code this PR touches or depends on. Not blockers, but worth knowing._"
+    },
+    {
+      "severity": "critical",
+      "file": "tailwind.config.ts",
+      "line": 66,
+      "comment": "> There's a syntax error in `tailwind.config.ts` within the `sidebar` color definition. A closing brace `}` is missing after `'primary-foreground': 'hsl(var(--sidebar-primary-foreground))'`. This will cause the Tailwind CSS configuration to fail parsing, preventing styles from being applied correctly or breaking the build. Please add the missing brace."
+    },
+    {
+      "severity": "major",
+      "file": "src/app/layout.tsx",
+      "line": 30,
+      "comment": "> The `Inter` and `Source Code Pro` fonts are being loaded twice: once via the optimized `next/font/google` (correctly in the JS) and again via redundant `<link>` tags in the `head`. This causes duplicate network requests, unnecessarily impacting performance and potentially leading to FOUT/FOIT. Please remove the `<link>` tags for these fonts from the `head` section."
+    }
+  ]
+}

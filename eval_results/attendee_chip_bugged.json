@@ -1,0 +1,34 @@
+{
+  "case_id": "attendee_chip_bugged",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 3,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1_score": 0.667,
+    "avg_tp_confidence": 96.7
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "minor",
+      "file": "src/components/user-nav.tsx",
+      "line": 16,
+      "comment": "> This `User` type is well-defined here! For types that represent core application entities like `User`, it's often beneficial to define them in a centralized location, like `src/lib/types.ts`. This promotes reusability and avoids duplication.\n\n**WHY:** Local type definitions can lead to scattered, potentially inconsistent definitions if the `User` structure changes or is needed elsewhere.\n**WHAT:** Makes refactoring harder and increases the chance of subtle type mismatches across components.\n**HOW:** Move the `User` type to `src/lib/types.ts` and import it here: `import { User } from '@/lib/types';`"
+    },
+    {
+      "severity": "minor",
+      "file": "src/components/kanban/kanban-card.tsx",
+      "line": 12,
+      "comment": "> These helper functions, `getInitials` and `getCreatorName`, are neatly encapsulated! Since they don't rely on component state or props (other than their direct arguments), you can move them outside the component function (e.g., to the top of the file, or a dedicated `utils` file). While modern JS engines are smart, this improves readability and signals they are pure utilities.\n\n**WHY:** Functions defined inside components are re-created on every render, which can slightly impact performance for complex logic (though minor here).\n**WHAT:** Can clutter component logic and make the file longer than necessary.\n**HOW:** Hoist these functions above the `KanbanCard` component definition."
+    },
+    {
+      "severity": "minor",
+      "file": "src/components/kanban/kanban-card.tsx",
+      "line": 41,
+      "comment": "> Great use of `Tooltip` and `Badge` for the creator! I noticed you have `getInitials` defined and `Avatar` components imported, but the current snippet only shows a `Badge` for the creator. It seems an `Avatar` might be intended here but is missing. This could be an incomplete feature or dead code.\n\n**WHY:** The presence of `getInitials` and `Avatar` imports suggests an intention to visually represent the creator with an avatar.\n**WHAT:** The component might be missing a visual cue for task creators, or `getInitials` is unused dead code.\n**HOW:** Consider adding an `Avatar` component (e.g., `AvatarFallback>{getInitials(task.creator)}</AvatarFallback>`) to visually represent the creator, perhaps next to the badge, or remove the unused code if an avatar is not desired."
+    }
+  ]
+}

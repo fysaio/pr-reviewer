@@ -1,0 +1,40 @@
+{
+  "case_id": "auth_success_page_bugs",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 4,
+    "precision": 0.429,
+    "recall": 1.0,
+    "f1_score": 0.6,
+    "avg_tp_confidence": 96.7
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "critical",
+      "file": "src/lib/oauth.ts",
+      "line": 48,
+      "comment": "> Great work setting up the OAuth config! I noticed `getRedirectUri()` is called in `generateAuthUrl` but isn't defined in this file. WHY: This will cause a runtime error. WHAT: Users won't be able to initiate the login flow, making the app unusable. HOW: Please define `getRedirectUri` to select the correct redirect URI for the current environment. Example: `const getRedirectUri = () => oauthConfig.redirectUris[0];` (or use `process.env.NODE_ENV` for selection)."
+    },
+    {
+      "severity": "critical",
+      "file": "src/lib/oauth.ts",
+      "line": 64,
+      "comment": "> You're on the right track with CSRF protection by generating a random state! There's a small syntax error in `generateRandomState()`. WHY: The line is incomplete, missing a closing parenthesis and argument to `substring`. WHAT: This will prevent the file from compiling. HOW: Complete the line to ensure the state is properly generated. Example: `Math.random().toString(36).substring(2, 15);`"
+    },
+    {
+      "severity": "critical",
+      "file": "src/lib/oauth.ts",
+      "line": 30,
+      "comment": "> Excellent setup for Google OAuth! One crucial security point: the `clientSecret` should NEVER be exposed client-side. WHY: It's a highly sensitive credential for server-to-server auth. WHAT: An attacker could steal it and impersonate your app. HOW: Remove `clientSecret` from `oauthConfig` for frontend use. The token exchange step must happen on a secure backend endpoint where the secret is stored and used safely. This implies a needed architectural change for how token exchange happens."
+    },
+    {
+      "severity": "critical",
+      "file": "src/lib/file-manager.ts",
+      "line": 68,
+      "comment": "> Looks like you're creating a solid file management system! I spotted a small syntax error in `generateFilePath`. WHY: The line `le` is incomplete. WHAT: This will cause a compilation error. HOW: Please complete the variable declaration, likely `let fileDir: string;` or similar, to ensure the function works as expected."
+    }
+  ]
+}

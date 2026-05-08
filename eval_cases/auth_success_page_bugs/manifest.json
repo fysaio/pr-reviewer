@@ -1,0 +1,49 @@
+{
+  "case_id": "auth_success_page_bugs",
+  "buggy_filename": "buggy.tsx",
+  "file_path": "src/app/auth/success/page.tsx",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "null_reference",
+      "severity": "critical",
+      "line": 20,
+      "description": "The application attempts to call `handleOAuthCallback` if only the `code` parameter is present, potentially passing `null` for the `state` parameter, which could lead to a null reference exception or unexpected behavior in the authentication handler.",
+      "hint_keywords": [
+        "null",
+        "state",
+        "undefined",
+        "missing parameter",
+        "crash"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "logic_error",
+      "severity": "major",
+      "line": 23,
+      "description": "After successful authentication, the user is always redirected to the root path (`/`) instead of checking for and respecting a `returnUrl` query parameter, which is a common pattern for redirecting users back to their intended destination.",
+      "hint_keywords": [
+        "redirect",
+        "returnUrl",
+        "destination",
+        "post-login",
+        "UX"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "silent_data_loss",
+      "severity": "major",
+      "line": 27,
+      "description": "When the OAuth callback fails, the application redirects to the login page with a generic error parameter (`error=true`), discarding the specific reason for the authentication failure and making it harder for users or support to understand the issue.",
+      "hint_keywords": [
+        "error message",
+        "diagnostics",
+        "debugging",
+        "user feedback",
+        "context"
+      ]
+    }
+  ]
+}

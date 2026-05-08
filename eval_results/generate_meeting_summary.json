@@ -1,0 +1,41 @@
+{
+  "case_id": "generate_meeting_summary",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 2,
+    "false_negatives": 1,
+    "false_positives": 3,
+    "precision": 0.4,
+    "recall": 0.667,
+    "f1_score": 0.5,
+    "avg_tp_confidence": 97.5
+  },
+  "missed": [
+    {
+      "id": "bug_002",
+      "severity": "major",
+      "description": "The AI prompt instruction was modified to omit asking for 'action items', leading to silent data loss as the model may no longer reliably extract and return them.",
+      "line": 45
+    }
+  ],
+  "false_alarms": [
+    {
+      "severity": "minor",
+      "file": "src/ai/flows/generate-meeting-summary.ts",
+      "line": 58,
+      "comment": "> Great progress on the flow! One tiny style note: it's a common convention for text files (especially code) to end with a newline character. This helps with diff tools, concatenation, and some linters. Easy fix: just add a blank line at the very end of the file. Many IDEs can be configured to do this automatically!\n\n---\n### Related Issues Worth Noting\n\n_These are pre-existing issues in code this PR touches or depends on. Not blockers, but worth knowing._"
+    },
+    {
+      "severity": "critical",
+      "file": "src/ai/genkit.ts",
+      "line": 5,
+      "comment": "> Thanks for setting up the Genkit client! I noticed the model is set to `googleai/gemini-2.5-flash`. From what I know, `gemini-2.5-flash` isn't a recognized model ID. It's likely a typo and should probably be `googleai/gemini-1.5-flash` or `googleai/gemini-1.0-pro`. Using an incorrect model name will prevent our AI features from working. Let's double-check the Genkit docs to pick a valid model and get this running smoothly!"
+    },
+    {
+      "severity": "major",
+      "file": "package.json",
+      "line": 85,
+      "comment": "> I spotted something in `package.json` that looks like an incomplete dependency entry: `\"tailwi\"`. This indicates the file might be truncated or have a typo. A malformed `package.json` could cause `npm install` or `yarn install` to fail, blocking development. Could you please complete or correct this entry? It might have been intended as `tailwindcss` or another related package."
+    }
+  ]
+}

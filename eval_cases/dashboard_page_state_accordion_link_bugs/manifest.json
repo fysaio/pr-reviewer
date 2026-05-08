@@ -1,0 +1,49 @@
+{
+  "case_id": "dashboard_page_state_accordion_link_bugs",
+  "buggy_filename": "buggy.tsx",
+  "file_path": "src/app/page.tsx",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "state_mutation",
+      "severity": "critical",
+      "line": 74,
+      "description": "The `handleDeleteEvent` function mutates the `upcomingEvents` array directly using `splice`, which violates React's immutability principle and can lead to unexpected rendering or state issues.",
+      "hint_keywords": [
+        "state mutation",
+        "splice",
+        "immutable update",
+        "re-render",
+        "unexpected behavior"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "logic_error",
+      "severity": "major",
+      "line": 160,
+      "description": "The 'Join Meeting' link uses a fallback to '/dashboard' if `event.link` is missing, which is a logic error as it misleads the user into thinking a meeting link is available when it is not.",
+      "hint_keywords": [
+        "logic error",
+        "missing link",
+        "fallback URL",
+        "misleading",
+        "dashboard redirection"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "logic_error",
+      "severity": "major",
+      "line": 107,
+      "description": "The `Accordion` component's `type` prop is set to 'multiple', allowing users to expand multiple event details simultaneously, which contradicts the likely intended 'single' expansion behavior for better user experience.",
+      "hint_keywords": [
+        "logic error",
+        "accordion",
+        "multiple expansion",
+        "single expansion",
+        "user experience"
+      ]
+    }
+  ]
+}

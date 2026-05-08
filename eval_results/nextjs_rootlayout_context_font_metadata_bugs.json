@@ -1,0 +1,52 @@
+{
+  "case_id": "nextjs_rootlayout_context_font_metadata_bugs",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 6,
+    "precision": 0.333,
+    "recall": 1.0,
+    "f1_score": 0.5,
+    "avg_tp_confidence": 98.3
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "minor",
+      "file": "src/app/layout.tsx",
+      "line": 51,
+      "comment": "> Small detail, but it's good practice to ensure your files end with a newline character. Some tools or linters might flag this, and it can affect how `git diff` shows changes. It's a quick fix that keeps things tidy!\n\n---\n### Related Issues Worth Noting\n\n_These are pre-existing issues in code this PR touches or depends on. Not blockers, but worth knowing._"
+    },
+    {
+      "severity": "critical",
+      "file": "src/contexts/auth-context.tsx",
+      "line": 82,
+      "comment": "> Looks like a typo here: `STORAGE_KEYS.ACCES` should be `STORAGE_KEYS.ACCESS_TOKEN`. This will prevent the new access token from being saved correctly after a refresh, leading to users being logged out unnecessarily or repeated failed refresh attempts. Great catch for preventing runtime issues!"
+    },
+    {
+      "severity": "major",
+      "file": "src/contexts/auth-context.tsx",
+      "line": 79,
+      "comment": "> This line hardcodes the token expiry to 1 hour after a refresh. OAuth providers usually return an `expires_in` value with the new access token. It's best practice to use that value for accuracy, as the actual token lifespan might differ. This ensures we're always aligned with the provider's token policy and avoid premature expiry or using a stale token."
+    },
+    {
+      "severity": "minor",
+      "file": "src/app/globals.css",
+      "line": 2,
+      "comment": "> Hey, I noticed `@tailwind base;` is duplicated at the top of the file. While it's harmless, it's good to keep our CSS concise. You can safely remove one of them! Small cleanups like these help maintain code quality."
+    },
+    {
+      "severity": "major",
+      "file": "src/app/globals.css",
+      "line": 60,
+      "comment": "> Heads up, the `--sidebar-background` variable in your dark theme definition looks truncated (`--sidebar-backgroun`). This means any CSS rule trying to use `var(--sidebar-background)` in dark mode will fail to find it, leading to incorrect styling. A quick fix to ensure consistent theming!"
+    },
+    {
+      "severity": "minor",
+      "file": "src/app/login/page.tsx",
+      "line": 41,
+      "comment": "> Looks like a small typo here: `CardHeader cla` should be `CardHeader className`. This might prevent your header from getting its intended styling and layout. It's an easy fix to make sure your UI looks just right!"
+    }
+  ]
+}

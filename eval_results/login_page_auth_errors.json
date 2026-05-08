@@ -1,0 +1,52 @@
+{
+  "case_id": "login_page_auth_errors",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 6,
+    "precision": 0.333,
+    "recall": 1.0,
+    "f1_score": 0.5,
+    "avg_tp_confidence": 100.0
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "minor",
+      "file": "src/app/login/page.tsx",
+      "line": 86,
+      "comment": "> WHY: The file `src/app/login/page.tsx` is missing a newline character at the end. WHAT: This is a minor stylistic issue that can cause warnings with some linters or diff tools and is generally considered bad practice in Unix-like environments. HOW: Add a new line at the very end of the file.\n\n---\n### Related Issues Worth Noting\n\n_These are pre-existing issues in code this PR touches or depends on. Not blockers, but worth knowing._"
+    },
+    {
+      "severity": "minor",
+      "file": "src/app/auth/success/page.tsx",
+      "line": 27,
+      "comment": "> WHY: After calling `router.push` to redirect to the login page, the `useEffect` hook continues its execution. WHAT: While the `if (code && state)` guard helps, it's generally good practice to explicitly `return` after a `router.push` within `useEffect` to prevent further execution of side effects that might rely on the current page's state or cause unnecessary operations. HOW: Add `return;` immediately after `router.push('/login?error=Invalid%20callback%20parameters');` to cleanly exit the effect."
+    },
+    {
+      "severity": "minor",
+      "file": "src/contexts/auth-context.tsx",
+      "line": 13,
+      "comment": "> WHY: The `GoogleUser` type is imported from `@/lib/oauth` but is not used anywhere within this file. WHAT: Unused imports can clutter the code and slightly increase bundle size (though modern bundlers often optimize this). It suggests either a leftover from previous development or an incomplete feature. HOW: Remove the unused import `GoogleUser` from this file to keep the code clean and focused."
+    },
+    {
+      "severity": "major",
+      "file": "src/contexts/auth-context.tsx",
+      "line": 52,
+      "comment": "> WHY: The `newExpiry` for the access token is hardcoded to `now + (3600 * 1000)` (1 hour). WHAT: This is problematic because access token lifespans are determined by the OAuth provider and can vary. Hardcoding this value means the application might incorrectly assume a token is valid when it's expired, or prematurely mark a token as expired, leading to unexpected logouts or failed API calls. HOW: The `refreshAccessToken` function should return the actual `expires_in` value from the OAuth provider's refresh token response. Use that dynamic value to set `newExpiry` accurately."
+    },
+    {
+      "severity": "critical",
+      "file": "src/contexts/auth-context.tsx",
+      "line": 55,
+      "comment": "> WHY: There's a typo in the `localStorage.setItem` key: `STORAGE_KEYS.ACCES` instead of `STORAGE_KEYS.ACCESS_TOKEN`. WHAT: This is a critical bug. The access token will not be stored correctly in local storage, meaning that after a page refresh or revisit, the application will not find the access token and users will be unexpectedly logged out, even if they had a valid session. HOW: Correct the key to `STORAGE_KEYS.ACCESS_TOKEN` to ensure the access token is persistently stored and retrieved correctly. E.g., `localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, newAccessToken);`"
+    },
+    {
+      "severity": "minor",
+      "file": "src/contexts/auth-context.tsx",
+      "line": 35,
+      "comment": "> WHY: Direct access to `localStorage` is used throughout the `AuthProvider`. WHAT: While functional for client-side, this tightly couples your authentication logic to `localStorage`. It makes testing harder, limits flexibility if you need to switch storage mechanisms (e.g., cookies, session storage, more robust state management), and can cause issues in environments without `localStorage` (though `'use client'` helps here). HOW: Consider creating a small abstraction layer or a custom hook (e.g., `usePersistentAuthStorage`) to encapsulate `localStorage` interactions, making the code more testable and adaptable."
+    }
+  ]
+}

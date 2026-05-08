@@ -1,0 +1,52 @@
+{
+  "case_id": "nextjs_rootlayout_context_font_metadata_bugs",
+  "buggy_filename": "buggy.tsx",
+  "file_path": "src/app/layout.tsx",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "logic_error",
+      "severity": "critical",
+      "line": 49,
+      "description": "Placing 'children' outside 'AuthProvider' will prevent all child components from accessing the authentication context, causing widespread null reference errors and breaking core application functionality.",
+      "hint_keywords": [
+        "context",
+        "provider",
+        "children",
+        "authentication",
+        "access",
+        "null"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "wrong_variable",
+      "severity": "major",
+      "line": 40,
+      "description": "Using 'fontSourceCodePro.className' instead of 'fontSourceCodePro.variable' means the custom CSS variable for Source Code Pro will not be correctly registered, leading to the font not being applied as intended in various parts of the application.",
+      "hint_keywords": [
+        "font",
+        "variable",
+        "className",
+        "styling",
+        "CSS",
+        "next/font"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "silent_data_loss",
+      "severity": "major",
+      "line": 21,
+      "description": "Setting the 'metadata.description' to an empty string results in the loss of critical SEO and social media sharing information, negatively impacting discoverability and user engagement without causing a runtime error.",
+      "hint_keywords": [
+        "metadata",
+        "description",
+        "SEO",
+        "social media",
+        "empty string",
+        "data loss"
+      ]
+    }
+  ]
+}

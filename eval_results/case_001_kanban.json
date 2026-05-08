@@ -1,0 +1,47 @@
+{
+  "case_id": "case_001_kanban",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 1,
+    "false_negatives": 2,
+    "false_positives": 3,
+    "precision": 0.25,
+    "recall": 0.333,
+    "f1_score": 0.286,
+    "avg_tp_confidence": 100.0
+  },
+  "missed": [
+    {
+      "id": "bug_002",
+      "severity": "major",
+      "description": "Guard uses && instead of || \u00e2\u20ac\u201d both conditions must be falsy to return early, allows null user through",
+      "line": 52
+    },
+    {
+      "id": "bug_003",
+      "severity": "major",
+      "description": "splice(taskIndex, 2) removes two elements instead of one, silently deleting adjacent task",
+      "line": 38
+    }
+  ],
+  "false_alarms": [
+    {
+      "severity": "critical",
+      "file": "components/kanban-board.tsx",
+      "line": 1,
+      "comment": "> The `kanban-board.tsx` file contains placeholder comments instead of the actual component implementation. WHY: This means the `KanbanBoard` component is not defined. WHAT: Your application will fail to compile or crash at runtime when `TasksView` tries to import and use `KanbanBoard`. HOW: Please replace the comments with the complete `KanbanBoard` component code. Refer to our previous discussions or component library for the intended structure.\n\n---\n### Related Issues Worth Noting\n\n_These are pre-existing issues in code this PR touches or depends on. Not blockers, but worth knowing._"
+    },
+    {
+      "severity": "minor",
+      "file": "src/components/tasks-view.tsx",
+      "line": 16,
+      "comment": "> The mock data for `pastMeetings` and `mockTaskBoards` is defined directly within `tasks-view.tsx`. WHY: Placing large or complex mock data directly in component files can clutter the component's logic, make the file harder to read, and hinder testing component isolation. WHAT: As your application grows, this approach can become difficult to manage. HOW: Extract these mock data structures into a dedicated file (e.g., `src/mocks/taskMocks.ts`) and import them. This improves modularity and separation of concerns."
+    },
+    {
+      "severity": "minor",
+      "file": "src/components/tasks-view.tsx",
+      "line": 26,
+      "comment": "> The `creator` field for task `q2-3` is 'Sundar Pichai', while most other tasks consistently use 'AI'. WHY: This creates an inconsistency in your mock data. WHAT: Depending on how the `creator` field is used (e.g., for filtering, displaying user avatars, or specific logic), this inconsistency could lead to unexpected behavior or minor UI bugs. It also might not align with the intended meaning if 'AI' signifies system-generated tasks. HOW: Clarify the exact purpose of the `creator` field. If it's generic for system-generated tasks, change 'Sundar Pichai' to 'AI' for consistency: `creator: \"AI\"`."
+    }
+  ]
+}

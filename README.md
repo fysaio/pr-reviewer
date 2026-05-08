@@ -116,5 +116,9 @@ uvicorn app.main:app --reload
 4. **AI Review**: The PR diff + retrieved context are sent to Gemini for analysis.
 5. **Feedback**: Review comments are posted back to the GitHub PR automatically.
 
+## Writeup
+
+[How Reviu works, architecture decisions, and eval results →](./WRITEUP.md)
+
 ## License
 MIT

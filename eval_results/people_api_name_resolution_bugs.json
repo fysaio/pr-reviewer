@@ -1,0 +1,34 @@
+{
+  "case_id": "people_api_name_resolution_bugs",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 3,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1_score": 0.667,
+    "avg_tp_confidence": 100.0
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "critical",
+      "file": "src/lib/people-api.ts",
+      "line": 56,
+      "comment": "> WHY: The `capitalizeFirstLetter` function is incomplete; it's missing the logic to append the rest of the string and its closing curly brace. WHAT: This code will result in a syntax error, preventing the TypeScript file from compiling and thus the application from running. HOW: Complete the function by adding the missing return logic and closing brace: `return str.charAt(0).toUpperCase() + str.slice(1); }`."
+    },
+    {
+      "severity": "minor",
+      "file": "src/lib/people-api.ts",
+      "line": 23,
+      "comment": "> WHY: The logic blocks for handling '.' and '_' delimiters in `extractNameFromEmail` are almost identical, violating the DRY (Don't Repeat Yourself) principle. WHAT: Duplication increases maintenance overhead; if a change or bug fix is needed in the name extraction logic, it must be applied in multiple places, increasing the risk of inconsistencies or missed updates. HOW: Refactor by extracting the common logic into a helper function or a single block that takes the delimiter as a parameter."
+    },
+    {
+      "severity": "critical",
+      "file": "src/lib/people-api.ts",
+      "line": 211,
+      "comment": "> WHY: The `CACHE_DURATION` variable, used in the `setTimeout` call, is not defined in the provided `people-api.ts` context. WHAT: This will lead to a runtime error (`ReferenceError: CACHE_DURATION is not defined`) when the code executes, preventing the caching mechanism from functioning at all. HOW: Define `CACHE_DURATION` at the top of the file (e.g., `const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in ms`) or ensure it's correctly imported from another module."
+    }
+  ]
+}

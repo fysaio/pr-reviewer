@@ -1,0 +1,28 @@
+{
+  "case_id": "kanban_card_completion_creator_assignee_bugs",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 2,
+    "precision": 0.6,
+    "recall": 1.0,
+    "f1_score": 0.75,
+    "avg_tp_confidence": 95.0
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "minor",
+      "file": "src/components/kanban/kanban-card.tsx",
+      "line": 82,
+      "comment": "> The file `src/components/kanban/kanban-card.tsx` is missing a newline character at the end. WHY: This can cause issues with diff tools, linters, and some build systems, often leading to warnings or unexpected formatting. WHAT: It makes reviewing changes slightly harder and deviates from common file conventions. HOW: Please add a newline character to the very end of the file."
+    },
+    {
+      "severity": "critical",
+      "file": "src/components/kanban/kanban-board.tsx",
+      "line": 58,
+      "comment": "> The `handleAddTask` function is incomplete, ending abruptly at `const assignee`. WHY: This is a syntax error and a functional bug. WHAT: The application will not compile or will crash when attempting to add a new task, preventing core functionality. HOW: Complete the function by defining the assignee, generating a task ID, creating the `Task` object, updating the board state, and closing the dialog."
+    }
+  ]
+}

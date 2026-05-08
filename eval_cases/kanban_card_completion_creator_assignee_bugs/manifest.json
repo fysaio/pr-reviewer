@@ -1,0 +1,51 @@
+{
+  "case_id": "kanban_card_completion_creator_assignee_bugs",
+  "buggy_filename": "buggy.tsx",
+  "file_path": "src/components/kanban/kanban-card.tsx",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "silent_data_loss",
+      "severity": "critical",
+      "line": 34,
+      "description": "The 'onCheckedChange' handler for the Checkbox expects a boolean argument for the new checked state, but the 'onToggle' prop is defined as '() => void', silently dropping the checkbox's new state.",
+      "hint_keywords": [
+        "onCheckedChange",
+        "onToggle",
+        "type mismatch",
+        "event handler",
+        "checked state",
+        "argument ignored"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "incorrect_guard",
+      "severity": "major",
+      "line": 20,
+      "description": "The 'getCreatorName' function's guard condition does not handle empty string ('') creator values, causing it to return an empty string instead of 'Unknown' as intended for missing creator names.",
+      "hint_keywords": [
+        "empty string",
+        "guard condition",
+        "falsy value",
+        "missing name",
+        "return value"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "wrong_variable",
+      "severity": "major",
+      "line": 68,
+      "description": "The AvatarFallback component incorrectly displays the initials of the task creator instead of the assignee, leading to incorrect user representation.",
+      "hint_keywords": [
+        "avatar",
+        "fallback",
+        "initials",
+        "assignee",
+        "creator",
+        "wrong user"
+      ]
+    }
+  ]
+}

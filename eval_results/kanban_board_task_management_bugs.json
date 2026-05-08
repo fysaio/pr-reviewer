@@ -1,0 +1,40 @@
+{
+  "case_id": "kanban_board_task_management_bugs",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 4,
+    "precision": 0.429,
+    "recall": 1.0,
+    "f1_score": 0.6,
+    "avg_tp_confidence": 96.7
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "major",
+      "file": "src/components/kanban/kanban-board.tsx",
+      "line": 52,
+      "comment": "> Directly pushing to `newBoard[destinationColumnId]` mutates the array in place. React needs a new array reference to detect state changes. This will prevent UI updates for the destination column. Create a new array: `newBoard[destinationColumnId] = [...(newBoard[destinationColumnId] || []), updatedTask];`"
+    },
+    {
+      "severity": "minor",
+      "file": "src/components/kanban/kanban-board.tsx",
+      "line": 167,
+      "comment": "> Files should generally end with a newline character, as per POSIX standards. Many tools (linters, Git) expect this, and its absence can cause minor issues with diffs or concatenation. Configure your editor to automatically add a final newline.\n\n---\n### Related Issues Worth Noting\n\n_These are pre-existing issues in code this PR touches or depends on. Not blockers, but worth knowing._"
+    },
+    {
+      "severity": "major",
+      "file": ".vscode/css.json",
+      "line": 1,
+      "comment": "> The `.vscode/css.json` file is for VS Code's CSS settings, but it contains `compilerOptions` for TypeScript/JavaScript path aliases. VS Code will ignore these, causing `@/` imports to fail in the editor. Move these to a `jsconfig.json` or `tsconfig.json` at the project root for proper resolution."
+    },
+    {
+      "severity": "critical",
+      "file": "apphosting.yaml",
+      "line": 5,
+      "comment": "> The `maxInstances: 1` in `apphosting.yaml` prevents your backend from scaling beyond a single instance. This is a critical bottleneck for production. If traffic increases, your app will experience severe performance degradation or outages. Review expected load and increase this value to allow for proper scaling."
+    }
+  ]
+}

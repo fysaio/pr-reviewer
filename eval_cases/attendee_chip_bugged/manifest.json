@@ -1,0 +1,55 @@
+{
+  "case_id": "attendee_chip_bugged",
+  "buggy_filename": "buggy.tsx",
+  "file_path": "src/components/attendee-chip.tsx",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "null_reference",
+      "severity": "critical",
+      "line": 45,
+      "description": "The `onRemove` callback is invoked without checking if it's defined, leading to a runtime error if `onRemove` is not provided.",
+      "hint_keywords": [
+        "null",
+        "undefined",
+        "callback",
+        "invocation",
+        "crash",
+        "guard",
+        "optional"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "logic_error",
+      "severity": "major",
+      "line": 34,
+      "description": "The `title` attribute of the span now displays the derived `displayName` instead of the full `attendee.email`, which reduces the helpfulness of the tooltip for identification.",
+      "hint_keywords": [
+        "tooltip",
+        "title attribute",
+        "email",
+        "display name",
+        "information",
+        "usability",
+        "hover"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "incorrect_operator",
+      "severity": "major",
+      "line": 25,
+      "description": "The logical OR operator (`||`) was incorrectly replaced with an AND operator (`&&`) when determining the `displayName`, causing the `firstName` to be ignored in favor of the email prefix or 'Unknown' even when `firstName` is provided.",
+      "hint_keywords": [
+        "operator",
+        "logical OR",
+        "logical AND",
+        "precedence",
+        "fallback",
+        "display name",
+        "priority"
+      ]
+    }
+  ]
+}

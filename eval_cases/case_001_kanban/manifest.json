@@ -1,0 +1,31 @@
+{
+  "case_id": "case_001_kanban",
+  "buggy_filename": "buggy.tsx",
+  "file_path": "components/kanban-board.tsx",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "state_mutation",
+      "severity": "critical",
+      "line": 35,
+      "description": "Missing array spread on sourceColumn causes direct mutation of React state",
+      "hint_keywords": ["mutation", "state", "spread", "splice", "mutable"]
+    },
+    {
+      "id": "bug_002",
+      "type": "incorrect_guard",
+      "severity": "major",
+      "line": 52,
+      "description": "Guard uses && instead of || — both conditions must be falsy to return early, allows null user through",
+      "hint_keywords": ["guard", "null", "user", "condition", "operator"]
+    },
+    {
+      "id": "bug_003",
+      "type": "off_by_one",
+      "severity": "major",
+      "line": 38,
+      "description": "splice(taskIndex, 2) removes two elements instead of one, silently deleting adjacent task",
+      "hint_keywords": ["splice", "delete", "remove", "adjacent", "count"]
+    }
+  ]
+}

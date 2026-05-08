@@ -1,0 +1,55 @@
+{
+  "case_id": "people_api_name_resolution_bugs",
+  "buggy_filename": "buggy.ts",
+  "file_path": "src/lib/people-api.ts",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "error_swallowing",
+      "severity": "critical",
+      "line": 192,
+      "description": "The cache resolution catches any error from the underlying name resolution and silently returns a 'not found' result, preventing proper error propagation or debugging for API failures.",
+      "hint_keywords": [
+        "cache",
+        "error",
+        "swallowing",
+        "try-catch",
+        "silent",
+        "propagation",
+        "API"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "race_condition",
+      "severity": "major",
+      "line": 205,
+      "description": "The cache invalidation `setTimeout` is not managed; if a cached entry is re-resolved before its previous timeout fires, the old timeout will delete the refreshed entry prematurely, leading to cache thrashing.",
+      "hint_keywords": [
+        "cache",
+        "invalidation",
+        "setTimeout",
+        "race",
+        "condition",
+        "premature",
+        "deletion"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "wrong_variable",
+      "severity": "major",
+      "line": 242,
+      "description": "The `getFirstName` function incorrectly uses `response.lastName` as the primary source for the first name, leading to incorrect casual addressing or fallback logic.",
+      "hint_keywords": [
+        "variable",
+        "lastName",
+        "firstName",
+        "incorrect",
+        "logic",
+        "name",
+        "display"
+      ]
+    }
+  ]
+}

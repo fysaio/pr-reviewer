@@ -1,0 +1,58 @@
+{
+  "case_id": "dashboard_page_state_accordion_link_bugs",
+  "scores": {
+    "total_bugs_planted": 3,
+    "true_positives": 3,
+    "false_negatives": 0,
+    "false_positives": 7,
+    "precision": 0.3,
+    "recall": 1.0,
+    "f1_score": 0.462,
+    "avg_tp_confidence": 100.0
+  },
+  "missed": [],
+  "false_alarms": [
+    {
+      "severity": "minor",
+      "file": "src/app/page.tsx",
+      "line": 210,
+      "comment": "> The file `src/app/page.tsx` is missing a trailing newline character. This is a widely adopted standard for text files and can cause issues with `diff` tools, concatenation, or certain build processes. Ensure all source files end with a newline. Most IDEs can be configured to add this automatically on save.\n\n---\n### Related Issues Worth Noting\n\n_These are pre-existing issues in code this PR touches or depends on. Not blockers, but worth knowing._"
+    },
+    {
+      "severity": "critical",
+      "file": "src/lib/meeting-link-generator.ts",
+      "line": 68,
+      "comment": "> The `generateGoogleMeetLink` function is declared but incomplete, abruptly ending mid-signature. This will cause a compilation error, preventing the application from building or running successfully. Please complete the function's parameter list, return type, and body. Example: `function generateGoogleMeetLink(meetingId: string): string { return `https://meet.google.com/${meetingId}`; }`"
+    },
+    {
+      "severity": "major",
+      "file": "src/lib/meeting-link-generator.ts",
+      "line": 35,
+      "comment": "> The `generateMeetingId` logic for 'zoom' uses `Date.now().toString(36)`, which produces alphanumeric strings. Zoom meeting IDs are typically 9-11 *numeric* digits. Generating non-numeric IDs will result in invalid and unusable meeting links. To fix, generate strictly numeric IDs. Example: `return Math.floor(10000000000 + Math.random() * 90000000000).toString().substring(0, 11);`"
+    },
+    {
+      "severity": "minor",
+      "file": "src/components/chat-view.tsx",
+      "line": 61,
+      "comment": "> The `isTyping` state is declared but appears to be unused in the `ChatView` component. Dead code can clutter the codebase, making it harder to read and maintain, and potentially indicates an unfinished feature. If this state is not needed, please remove it. If it's for future use, add a comment indicating its purpose. Example: Remove `const [isTyping, setIsTyping] = React.useState(false);`"
+    },
+    {
+      "severity": "minor",
+      "file": "src/components/chat-view.tsx",
+      "line": 62,
+      "comment": "> The `emailInput` state is declared but appears to be unused in the `ChatView` component. Similar to `isTyping`, this dead code can add unnecessary complexity. Please remove it if it's not being used, or implement the functionality that requires it. Example: Remove `const [emailInput, setEmailInput] = React.useState(\"\");`"
+    },
+    {
+      "severity": "minor",
+      "file": "package-lock.json",
+      "line": 36,
+      "comment": "> `dotenv` is listed as a dependency. For client-side Next.js applications (`'use client'`), environment variables are typically handled by Next.js during build, and `dotenv` is usually not needed at runtime. If its use is limited to server-side or build scripts, it should be moved to `devDependencies` to avoid unnecessary bundling. Example: Check `package.json` and move `dotenv` to `devDependencies`."
+    },
+    {
+      "severity": "minor",
+      "file": "package-lock.json",
+      "line": 69,
+      "comment": "> The project uses `next: \"15.0.0\"`. Using a `.0` release of a major version, especially if it's newly released or a pre-release, can introduce instability, unannounced breaking changes, or new bugs. For production-grade applications, it's safer to use more stable patch versions. Consider using a stable `^14.x.x` version until `15.x.x` matures."
+    }
+  ]
+}

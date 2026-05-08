@@ -1,0 +1,49 @@
+{
+  "case_id": "generate_meeting_summary",
+  "buggy_filename": "buggy.ts",
+  "file_path": "src/ai/flows/generate-meeting-summary.ts",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "null_reference",
+      "severity": "critical",
+      "line": 46,
+      "description": "The prompt template uses `{{{input.meetingDetails}}}` instead of `{{{meetingDetails}}}`, causing the `meetingDetails` value to be `null` or `undefined` within the AI prompt's context.",
+      "hint_keywords": [
+        "prompt template",
+        "templating error",
+        "null value",
+        "undefined context",
+        "AI input"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "silent_data_loss",
+      "severity": "major",
+      "line": 45,
+      "description": "The AI prompt instruction was modified to omit asking for 'action items', leading to silent data loss as the model may no longer reliably extract and return them.",
+      "hint_keywords": [
+        "prompt instruction",
+        "missing output",
+        "action items",
+        "LLM output",
+        "incomplete response"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "incorrect_operator",
+      "severity": "major",
+      "line": 17,
+      "description": "The `meetingDetails` Zod schema uses `.length(10)` which restricts input to exactly 10 characters, instead of `.min(10)` which would allow any length greater than or equal to 10.",
+      "hint_keywords": [
+        "zod schema",
+        "validation rule",
+        "string length",
+        "minimum length",
+        "incorrect operator"
+      ]
+    }
+  ]
+}

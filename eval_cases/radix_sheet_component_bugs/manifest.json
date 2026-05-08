@@ -1,0 +1,55 @@
+{
+  "case_id": "radix_sheet_component_bugs",
+  "buggy_filename": "buggy.tsx",
+  "file_path": "src/components/ui/sheet.tsx",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "null_reference",
+      "severity": "critical",
+      "line": 62,
+      "description": "The 'ref' prop is not forwarded to SheetPrimitive.Content, preventing external components from programmatically accessing or interacting with the sheet's DOM element.",
+      "hint_keywords": [
+        "ref",
+        "forwardRef",
+        "DOM",
+        "element",
+        "access",
+        "programmatic",
+        "accessibility"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "logic_error",
+      "severity": "major",
+      "line": 34,
+      "description": "The open and close animation durations for the sheet are swapped, causing the sheet to close slower than it opens, which can lead to a disjointed user experience.",
+      "hint_keywords": [
+        "animation",
+        "duration",
+        "timing",
+        "open",
+        "close",
+        "transition",
+        "UX"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "off_by_one",
+      "severity": "major",
+      "line": 67,
+      "description": "The SheetClose button is mispositioned by one unit on the right side due to an 'off-by-one' error in its 'right-3' class, causing a slight visual inconsistency.",
+      "hint_keywords": [
+        "position",
+        "alignment",
+        "spacing",
+        "UI",
+        "visual",
+        "close button",
+        "offset"
+      ]
+    }
+  ]
+}

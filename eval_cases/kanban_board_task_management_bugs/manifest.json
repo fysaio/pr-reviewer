@@ -1,0 +1,54 @@
+{
+  "case_id": "kanban_board_task_management_bugs",
+  "buggy_filename": "buggy.tsx",
+  "file_path": "src/components/kanban/kanban-board.tsx",
+  "bugs": [
+    {
+      "id": "bug_001",
+      "type": "state_mutation",
+      "severity": "critical",
+      "line": 37,
+      "description": "The `sourceColumn` and `destinationColumn` arrays are directly mutated within the `setBoard` update, which can prevent React from detecting state changes and re-rendering the UI for affected columns.",
+      "hint_keywords": [
+        "state",
+        "mutation",
+        "array",
+        "reference",
+        "re-render",
+        "immutability",
+        "splice",
+        "push"
+      ]
+    },
+    {
+      "id": "bug_002",
+      "type": "logic_error",
+      "severity": "major",
+      "line": 69,
+      "description": "The `assignee` for a new task defaults to the `creator`'s name if the `assignee` input field is left empty, rather than saving an empty string or explicitly allowing for an unassigned task.",
+      "hint_keywords": [
+        "assignee",
+        "default",
+        "empty string",
+        "logic",
+        "task creation",
+        "unassigned"
+      ]
+    },
+    {
+      "id": "bug_003",
+      "type": "incorrect_guard",
+      "severity": "major",
+      "line": 112,
+      "description": "The 'Add Task' button is only displayed for columns that are currently empty, preventing users from adding tasks to columns that already contain tasks.",
+      "hint_keywords": [
+        "guard",
+        "conditional rendering",
+        "add task",
+        "button",
+        "empty column",
+        "visibility"
+      ]
+    }
+  ]
+}
